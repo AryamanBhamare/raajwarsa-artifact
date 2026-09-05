@@ -25,6 +25,14 @@ fs.mkdirSync(SHOTS, { recursive: true });
 const USER = process.env.SMOKE_ADMIN_USER || 'admin';
 const PASS = process.env.SMOKE_ADMIN_PASS || 'rajvarsa@123';
 
+// Content assertions are overridable so the smoke can run against any seeded DB.
+const EXPECT = {
+  collection: process.env.SMOKE_COLLECTION_TEXT || 'Kavacha',
+  detailPath: process.env.SMOKE_DETAIL_PATH || '/collection/maratha-pattern-bronze-kavacha-vessel',
+  detailText: process.env.SMOKE_DETAIL_TEXT || 'Maratha Pattern Bronze Kavacha Vessel',
+  adminArtifact: process.env.SMOKE_ADMIN_ARTIFACT_TEXT || 'Kavacha',
+};
+
 const CANDIDATE_BROWSERS = [
   process.env.PUPPETEER_EXECUTABLE_PATH,
   'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
@@ -96,10 +104,10 @@ try {
   console.log('--- public site ---');
 
   await visit(browser, 'home', '/', ['Raajwarasa']);
-  await visit(browser, 'collection', '/collection', ['Explore the Collection', 'Kavacha']);
+  await visit(browser, 'collection', '/collection', ['Explore the Collection', EXPECT.collection]);
   await visit(browser, 'collection:search', '/collection?search=brass', ['Explore the Collection']);
-  await visit(browser, 'artifact detail', '/collection/maratha-pattern-bronze-kavacha-vessel',
-    ['Maratha Pattern Bronze Kavacha Vessel', 'The Story Behind the Object']);
+  await visit(browser, 'artifact detail', EXPECT.detailPath,
+    [EXPECT.detailText, 'The Story Behind the Object']);
   await visit(browser, 'story', '/our-story', ['A heritage carried forward']);
   await visit(browser, 'heritage', '/heritage', ['The values behind the collection']);
   await visit(browser, 'journal index', '/journal', ['Notes from the archive', 'An Introduction']);
@@ -110,6 +118,11 @@ try {
   await visit(browser, 'legal,terms', '/terms', ['Terms of Use']);
   await visit(browser, 'legal,privacy', '/privacy', ['Privacy Policy']);
   await visit(browser, '404 page', '/no-such-page', ['THE ARCHIVE HAS NO RECORD OF THIS PAGE']);
+
+  console.log('--- cart & checkout ---');
+  // fresh browser context means the cart starts empty
+  await visit(browser, 'cart (empty)', '/cart', ['Your cart', 'Nothing in the cart yet']);
+  await visit(browser, 'checkout redirects to cart when empty', '/checkout', ['Your cart']);
 
   console.log('--- in-app navigation (real clicks, not direct URLs) ---');
   const nav = await newPage(browser);
@@ -146,7 +159,7 @@ try {
 
   await admin.goto(BASE + '/admin/artifacts', { waitUntil: 'networkidle2', timeout: 30000 });
   await hasText(admin, 'Artifacts');
-  await hasText(admin, 'Kavacha');
+  await hasText(admin, EXPECT.adminArtifact);
   adminSteps.push('artifacts list');
 
   await admin.goto(BASE + '/admin/artifacts/new', { waitUntil: 'networkidle2', timeout: 30000 });
@@ -178,6 +191,10 @@ try {
   await hasText(admin, 'Settings');
   await hasText(admin, 'Administrator Account');
   adminSteps.push('settings');
+
+  await admin.goto(BASE + '/admin/orders', { waitUntil: 'networkidle2', timeout: 30000 });
+  await hasText(admin, 'Orders');
+  adminSteps.push('orders');
 
   // category create → appears → delete  (full form POST + DELETE cycle)
   await admin.goto(BASE + '/admin/categories', { waitUntil: 'networkidle2', timeout: 30000 });

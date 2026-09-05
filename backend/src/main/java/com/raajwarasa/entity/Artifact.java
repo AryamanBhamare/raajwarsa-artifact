@@ -64,6 +64,12 @@ public class Artifact {
     @Column(length = 50)
     private String availability = "ON_REQUEST";
 
+    @Column(precision = 12, scale = 2)
+    private java.math.BigDecimal price;
+
+    @Column(name = "sale_available", nullable = false)
+    private boolean saleAvailable = false;
+
     @Column(nullable = false)
     private boolean featured = false;
 

@@ -20,6 +20,7 @@ body.rw-loading {
 .rw-loader--fade {
   opacity: 0;
   visibility: hidden;
+  pointer-events: none;
 }
 
 .rw-loader__inner {

@@ -1,5 +1,6 @@
 import Reveal from '../Reveal';
 import SectionHeading from '../SectionHeading';
+import { BRAND } from '../../config';
 
 const FEED_SAMPLE = [
   'bronze-vessel.svg',
@@ -24,7 +25,7 @@ export default function InstagramSection() {
           {FEED_SAMPLE.map((img, i) => (
             <Reveal key={img} delay={i * 70} className="insta__tile">
               <a
-                href="https://instagram.com/raajwarasa_artifacts"
+                href="{BRAND.instagramUrl}"
                 target="_blank"
                 rel="noreferrer"
                 className="insta__tile-link"
@@ -45,7 +46,7 @@ export default function InstagramSection() {
 
         <Reveal className="insta__cta">
           <a
-            href="https://instagram.com/raajwarasa_artifacts"
+            href="{BRAND.instagramUrl}"
             target="_blank"
             rel="noreferrer"
             className="btn btn--primary"
@@ -53,7 +54,7 @@ export default function InstagramSection() {
             Follow us on Instagram
             <span className="btn-arrow">→</span>
           </a>
-          <p className="insta__handle">@raajwarasa_artifacts</p>
+          <p className="insta__handle">@{BRAND.instagramHandle}</p>
         </Reveal>
       </div>
     </section>

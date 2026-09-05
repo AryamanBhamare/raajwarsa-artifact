@@ -122,6 +122,8 @@ public class ArtifactService {
         a.setPreservation(req.preservation());
         a.setProvenance(req.provenance());
         a.setAvailability(req.availability() == null || req.availability().isBlank() ? "ON_REQUEST" : req.availability());
+        a.setPrice(req.price());
+        a.setSaleAvailable(!Boolean.FALSE.equals(req.saleAvailable()) && req.price() != null);
         a.setFeatured(Boolean.TRUE.equals(req.featured()));
         a.setActive(!Boolean.FALSE.equals(req.active()));
         a.setSortOrder(req.sortOrder() == null ? 0 : req.sortOrder());

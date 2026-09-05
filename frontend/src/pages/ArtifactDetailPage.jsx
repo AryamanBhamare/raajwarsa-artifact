@@ -2,13 +2,17 @@ import { useEffect, useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { fetchArtifact, fetchArtifacts } from '../lib/api';
 import { useEnquiry } from '../context/EnquiryContext';
+import { useCart } from '../context/CartContext';
 import ArtifactCard from '../components/ArtifactCard';
 import Reveal from '../components/Reveal';
 import { availabilityLabel, imagesOf, firstImage } from '../lib/utils';
+import { formatINR } from '../config';
 
 export default function ArtifactDetailPage() {
   const { slug } = useParams();
   const { openEnquiry } = useEnquiry();
+  const { items, addItem, removeItem, setQty } = useCart();
+  const [added, setAdded] = useState(false);
   const [artifact, setArtifact] = useState(null);
   const [related, setRelated] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -16,6 +20,7 @@ export default function ArtifactDetailPage() {
   const [activeTab, setActiveTab] = useState('story');
   const [lightbox, setLightbox] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const cartQty = items.find((i) => i.artifact.id === artifact?.id)?.qty || 0;
 
   useEffect(() => {
     let cancelled = false;
@@ -187,17 +192,53 @@ export default function ArtifactDetailPage() {
               <p className="artifact-info__lead">{artifact.description}</p>
             )}
 
-            <button
-              type="button"
-              className="btn btn--primary btn--lg artifact-info__enquire"
-              onClick={() => openEnquiry(artifact)}
-            >
-              Enquire about this artifact
-              <span className="btn-arrow">→</span>
-            </button>
-            <p className="artifact-info__hint">
-              Availability, pricing and provenance are discussed personally on enquiry.
-            </p>
+            {artifact.saleAvailable && artifact.price ? (
+              <div className="artifact-buy">
+                <div className="artifact-buy__price-row">
+                  <span className="artifact-buy__price">{formatINR(Number(artifact.price))}</span>
+                  <span className="artifact-buy__per">per piece · authentic archive piece</span>
+                </div>
+                <div className="artifact-buy__controls">
+                  <div className="artifact-buy__qty">
+                    <button type="button" onClick={() => setQty(artifact.id, (cartQty || 1) - 1)} aria-label="Decrease quantity">−</button>
+                    <span>{cartQty || 1}</span>
+                    <button type="button" onClick={() => setQty(artifact.id, (cartQty || 1) + 1)} aria-label="Increase quantity">+</button>
+                  </div>
+                  <button
+                    type="button"
+                    className={`btn btn--primary btn--lg artifact-buy__add ${added ? 'artifact-buy__add--added' : ''}`}
+                    onClick={() => {
+                      addItem(artifact, 1);
+                      setAdded(true);
+                      window.setTimeout(() => setAdded(false), 2200);
+                    }}
+                  >
+                    {added ? 'Added to cart ✓' : 'Add to cart'}
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  className="btn btn--outline artifact-buy__enquire"
+                  onClick={() => openEnquiry(artifact)}
+                >
+                  Ask a question about this piece
+                </button>
+              </div>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  className="btn btn--primary btn--lg artifact-info__enquire"
+                  onClick={() => openEnquiry(artifact)}
+                >
+                  Enquire about this artifact
+                  <span className="btn-arrow">→</span>
+                </button>
+                <p className="artifact-info__hint">
+                  Availability, pricing and provenance are discussed personally on enquiry.
+                </p>
+              </>
+            )}
           </div>
         </div>
       </section>

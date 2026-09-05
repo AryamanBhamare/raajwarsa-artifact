@@ -49,6 +49,10 @@ public record ArtifactRequest(
         @Size(max = 50)
         String availability,
 
+        java.math.BigDecimal price,
+
+        Boolean saleAvailable,
+
         Boolean featured,
 
         Boolean active,

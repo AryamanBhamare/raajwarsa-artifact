@@ -19,6 +19,8 @@ const EMPTY_FORM = {
   preservation: '',
   provenance: '',
   availability: 'ON_REQUEST',
+  price: '',
+  saleAvailable: false,
   featured: false,
   active: true,
   sortOrder: 0
@@ -58,6 +60,8 @@ export default function AdminArtifactForm() {
           preservation: a.preservation || '',
           provenance: a.provenance || '',
           availability: a.availability || 'ON_REQUEST',
+          price: a.price != null ? String(a.price) : '',
+          saleAvailable: !!a.saleAvailable,
           featured: a.featured,
           active: a.active,
           sortOrder: a.sortOrder || 0
@@ -105,8 +109,15 @@ export default function AdminArtifactForm() {
     }
     setSaving(true);
     setError('');
+    const cleanPrice = String(form.price).trim() === '' ? null : Number(form.price);
+    if (form.saleAvailable && (cleanPrice == null || cleanPrice <= 0)) {
+      setSaving(false);
+      setError('Enter a valid price above zero when the piece is listed for sale.');
+      return;
+    }
     const payload = {
       ...form,
+      price: cleanPrice,
       categoryId: Number(form.categoryId),
       images: allImages.map((url, i) => ({ url, altText: form.name, sortOrder: i }))
     };
@@ -157,6 +168,29 @@ export default function AdminArtifactForm() {
               <label>Availability</label>
               <select className="a-input" value={form.availability} onChange={set('availability')}>
                 {AVAILABILITY_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
+              </select>
+            </div>
+            <div className="a-field">
+              <label>Price (₹)</label>
+              <input
+                className="a-input"
+                type="number"
+                min="0"
+                step="1"
+                placeholder="e.g. 48500"
+                value={form.price}
+                onChange={set('price')}
+              />
+            </div>
+            <div className="a-field">
+              <label>Listing type</label>
+              <select
+                className="a-input"
+                value={form.saleAvailable ? 'SALE' : 'ENQUIRY'}
+                onChange={(e) => set('saleAvailable')({ target: { value: e.target.value === 'SALE' } })}
+              >
+                <option value="ENQUIRY">Enquiry only</option>
+                <option value="SALE">For sale (Add to cart)</option>
               </select>
             </div>
           </div>

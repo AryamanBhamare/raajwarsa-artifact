@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { submitContact } from '../lib/api';
 import Reveal from '../components/Reveal';
+import { BRAND, whatsappUrl, mapEmbedUrl, mapLinkUrl } from '../config';
 
 export default function ContactPage() {
   const [form, setForm] = useState({ name: '', email: '', phone: '', message: '' });
@@ -56,21 +57,35 @@ export default function ContactPage() {
 
               <div className="contact-page__channel">
                 <span className="contact-page__channel-label">Instagram</span>
-                <a href="https://instagram.com/raajwarasa_artifacts" target="_blank" rel="noreferrer" className="contact-page__channel-value">
-                  @raajwarasa_artifacts
+                <a href={BRAND.instagramUrl} target="_blank" rel="noreferrer" className="contact-page__channel-value">
+                  @{BRAND.instagramHandle}
+                </a>
+              </div>
+              <div className="contact-page__channel">
+                <span className="contact-page__channel-label">WhatsApp</span>
+                <a href={whatsappUrl()} target="_blank" rel="noreferrer" className="contact-page__channel-value">
+                  {BRAND.phoneDisplay}
+                </a>
+              </div>
+              <div className="contact-page__channel">
+                <span className="contact-page__channel-label">Phone</span>
+                <a href={`tel:+${BRAND.whatsappNumber}`} className="contact-page__channel-value">
+                  {BRAND.phoneDisplay}
                 </a>
               </div>
               <div className="contact-page__channel">
                 <span className="contact-page__channel-label">Email</span>
                 <span className="contact-page__channel-value contact-page__channel-value--muted">
-                  To be announced
+                  {BRAND.emailDisplay}
                 </span>
               </div>
               <div className="contact-page__channel">
                 <span className="contact-page__channel-label">Location</span>
-                <span className="contact-page__channel-value contact-page__channel-value--muted">
-                  Maharashtra, India
-                </span>
+                <span className="contact-page__channel-value">{BRAND.address}</span>
+              </div>
+              <div className="contact-page__channel">
+                <span className="contact-page__channel-label">Map code</span>
+                <span className="contact-page__channel-value">{BRAND.mapPlusCode}</span>
               </div>
             </div>
 
@@ -112,6 +127,51 @@ export default function ContactPage() {
                   </button>
                 </form>
               )}
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      <section className="visit section-pad" aria-label="Visit the studio">
+        <div className="container">
+          <Reveal className="visit__head">
+            <span className="eyebrow eyebrow--center">Find us</span>
+            <h2 className="visit__title">Visit the Deo Wada studio</h2>
+            <p className="visit__sub">Walk-ins by appointment — message us on WhatsApp and we will be glad to receive you.</p>
+          </Reveal>
+
+          <Reveal className="visit__grid">
+            <div className="visit__map">
+              <iframe
+                src={mapEmbedUrl}
+                title={`Map of ${BRAND.name} — ${BRAND.mapQuery}`}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                allowFullScreen
+              />
+            </div>
+            <div className="visit__card">
+              <h3 className="visit__card-title">{BRAND.name}</h3>
+              <p className="visit__card-address">{BRAND.mapQuery}</p>
+              <ul className="visit__card-list">
+                <li>
+                  <span className="visit__card-label">Phone / WhatsApp</span>
+                  <a href={whatsappUrl('Namaskar, I would like to visit the Raajwarasa studio.')}>{BRAND.phoneDisplay}</a>
+                </li>
+                <li>
+                  <span className="visit__card-label">Plus code</span>
+                  <span>{BRAND.mapPlusCode}</span>
+                </li>
+              </ul>
+              <div className="visit__actions">
+                <a href={mapLinkUrl} target="_blank" rel="noreferrer" className="btn btn--primary">
+                  Get directions
+                  <span className="btn-arrow">→</span>
+                </a>
+                <a href={whatsappUrl()} target="_blank" rel="noreferrer" className="btn btn--outline">
+                  WhatsApp us
+                </a>
+              </div>
             </div>
           </Reveal>
         </div>

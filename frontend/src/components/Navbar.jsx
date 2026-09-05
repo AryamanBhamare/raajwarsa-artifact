@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import SearchOverlay from './SearchOverlay';
+import { useCart } from '../context/CartContext';
+import { BRAND, whatsappUrl } from '../config';
 
 const NAV_ITEMS = [
   { label: 'Home', to: '/' },
@@ -16,6 +18,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const { count } = useCart();
   const location = useLocation();
   const navigate = useNavigate();
   const prevPath = useRef(location.pathname);
@@ -96,9 +99,9 @@ export default function Navbar() {
                   <path d="M21 21l-4.3-4.3" strokeLinecap="round" />
                 </svg>
               </button>
-              <a
+<a
                 className="nav__icon-btn nav__icon-btn--insta"
-                href="https://instagram.com/raajwarasa_artifacts"
+                href={BRAND.instagramUrl}
                 target="_blank"
                 rel="noreferrer"
                 aria-label="Raajwarasa on Instagram"
@@ -109,6 +112,14 @@ export default function Navbar() {
                   <circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none" />
                 </svg>
               </a>
+              <Link to="/cart" className="nav__icon-btn nav__icon-btn--cart" aria-label={`Cart with ${count} items`}>
+                <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" strokeWidth="1.6">
+                  <circle cx="9.5" cy="20" r="1.4" />
+                  <circle cx="17" cy="20" r="1.4" />
+                  <path d="M2.5 3.5h2.6l2.5 11.5h10.6l2-7.5H6.3" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                {count > 0 && <span className="nav__cart-badge">{count}</span>}
+              </Link>
               <button
                 type="button"
                 className={`nav__hamburger ${mobileOpen ? 'nav__hamburger--open' : ''}`}
@@ -157,9 +168,13 @@ export default function Navbar() {
               ))}
             </nav>
             <div className="drawer__foot">
-              <a href="https://instagram.com/raajwarasa_artifacts" target="_blank" rel="noreferrer">
-                @raajwarasa_artifacts
+              <a href={BRAND.instagramUrl} target="_blank" rel="noreferrer">
+                @{BRAND.instagramHandle}
               </a>
+              <a href={whatsappUrl()} target="_blank" rel="noreferrer">
+                WhatsApp us
+              </a>
+              <Link to="/cart">Your cart ({count})</Link>
             </div>
           </div>
         </div>

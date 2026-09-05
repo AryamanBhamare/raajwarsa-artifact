@@ -83,6 +83,10 @@ export async function submitContact(payload) {
   return api.post('/api/public/contact', payload);
 }
 
+export async function submitOrder(payload) {
+  return api.post('/api/public/orders', payload);
+}
+
 export async function fetchJournal(params = {}) {
   const q = new URLSearchParams();
   Object.entries(params).forEach(([k, v]) => {
@@ -185,5 +189,7 @@ export const adminApi = {
       return data;
     });
   },
-  deleteMedia: (id) => api.del(`/api/admin/media/${id}`, { auth: true })
+  deleteMedia: (id) => api.del(`/api/admin/media/${id}`, { auth: true }),
+  orders: () => api.get('/api/admin/orders', { auth: true }),
+  setOrderStatus: (id, status) => api.patch(`/api/admin/orders/${id}/status?status=${encodeURIComponent(status)}`, null, { auth: true })
 };

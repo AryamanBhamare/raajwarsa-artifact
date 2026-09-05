@@ -11,6 +11,7 @@ import AdminJournal from './AdminJournal';
 import AdminJournalForm from './AdminJournalForm';
 import AdminCategories from './AdminCategories';
 import AdminMedia from './AdminMedia';
+import AdminOrders from './AdminOrders';
 import AdminSettings from './AdminSettings';
 
 const NAV = [
@@ -18,6 +19,7 @@ const NAV = [
   { to: '/admin/artifacts', label: 'Artifacts', icon: '◈' },
   { to: '/admin/categories', label: 'Categories', icon: '≡' },
   { to: '/admin/inquiries', label: 'Enquiries', icon: '✉' },
+  { to: '/admin/orders', label: 'Orders', icon: '☰' },
   { to: '/admin/journal', label: 'Journal', icon: '✎' },
   { to: '/admin/media', label: 'Media', icon: '▣' },
   { to: '/admin/settings', label: 'Settings', icon: '⚙' }
@@ -114,6 +116,7 @@ export default function AdminLayout() {
           <Route path="categories" element={<AdminCategories />} />
           <Route path="inquiries" element={<AdminInquiries />} />
           <Route path="inquiries/:id" element={<AdminInquiryDetail />} />
+          <Route path="orders" element={<AdminOrders />} />
           <Route path="journal" element={<AdminJournal />} />
           <Route path="journal/new" element={<AdminJournalForm />} />
           <Route path="journal/edit/:id" element={<AdminJournalForm />} />

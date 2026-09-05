@@ -1,8 +1,7 @@
 import { Link } from 'react-router-dom';
-import { useEnquiry } from '../context/EnquiryContext';
+import { BRAND, whatsappUrl } from '../config';
 
 export default function Footer() {
-  const { openEnquiry } = useEnquiry();
 
   return (
     <footer className="footer">
@@ -45,7 +44,7 @@ export default function Footer() {
             </p>
             <div className="footer__social">
               <a
-                href="https://instagram.com/raajwarasa_artifacts"
+                href="{BRAND.instagramUrl}"
                 target="_blank"
                 rel="noreferrer"
                 className="footer__social-btn"
@@ -56,7 +55,7 @@ export default function Footer() {
                   <circle cx="12" cy="12" r="4" />
                   <circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none" />
                 </svg>
-                <span>@raajwarasa_artifacts</span>
+                <span>@{BRAND.instagramHandle}</span>
               </a>
             </div>
           </div>
@@ -73,10 +72,11 @@ export default function Footer() {
             <h4 className="footer__col-title">CONNECT</h4>
             <Link to="/enquire">Enquire</Link>
             <Link to="/contact">Contact</Link>
-            <button type="button" className="footer__link-btn" onClick={() => openEnquiry(null)}>
-              Start an enquiry
-            </button>
-            <a href="https://instagram.com/raajwarasa_artifacts" target="_blank" rel="noreferrer">
+            <Link to="/cart">Your cart</Link>
+            <a href={whatsappUrl()} target="_blank" rel="noreferrer">
+              WhatsApp ({BRAND.phoneDisplay})
+            </a>
+            <a href={BRAND.instagramUrl} target="_blank" rel="noreferrer">
               Instagram
             </a>
           </nav>
