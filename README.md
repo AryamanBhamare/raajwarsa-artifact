@@ -116,52 +116,28 @@ GitHub Actions runs the same suite (`.github/workflows/ci.yml`): a Postgres 16 s
 - `react-router-dom` is pinned to the v7 line — the v6 line has an unresolved open-redirect advisory (`GHSA-wrjc-x8rr-h8h6`). Verified green across the suite.
 - The only remaining `npm audit` findings are Vite 5 / esbuild **dev-server-only** advisories (they cannot affect the built static bundle; resolving them requires the Vite 8 major). The dev server binds to localhost.
 
-## Deployment (free, lifetime)
+## Run locally (recommended)
 
-The whole stack is designed for $0 hosting. | Area | Free option |
+The whole stack runs locally with Docker — no hosted services required.
 
-| Public site (SPA) | **Vercel Hobby** (free, one-click GitHub deploy; `frontend/vercel.json` included) — Cloudflare Pages also works |
-| Backend API | Oracle Cloud Always Free VM (1–4 OCPU ARM) or Render free web service running `docker-compose.yml` — or the same VPS for everything |
-| Database | Neon or Supabase free Postgres (Neon: true PostgreSQL, SQL passthrough, easy `DATABASE_URL`; Supabase: Postgres + storage if you want it) |
-| Media | On-VM disk via `UPLOAD_DIR` (simplest, zero cost). Upgrade path: Cloudflare R2 10GB tier — mount a browse-able object store or add a storage driver later |
+```bash
+cp .env.example .env        # then set your secrets
+docker compose up -d --build
+```
 
-Options in detail:
+| Service | URL |
+|---------|-----|
+| Website (SPA) | http://localhost:18081 |
+| Admin panel | http://localhost:18081/admin (owner-created login) |
+| Health check | http://localhost:18081/actuator/health |
 
-**Option A — everything on one VPS (simplest, recommended).** Bring up the Oracle Always Free VM, install Docker, then `docker compose up -d --build`. Back it with `scripts/backup.sh` on cron. Stick Cloudflare Tunnel (free) or Cloudflare DNS + the VPS IP in front for TLS.
+If you change the ports in `.env`, the table above changes with them (`WEB_PORT`, `API_PORT`, `POSTGRES_PORT`). The frontend also runs alone in dev mode: start the API (`cd backend && mvn spring-boot:run`) and `cd frontend && npm install && npm run dev` → http://localhost:5173.
 
-**Option B — fully managed split (Vercel + Render + Neon, all free).** Frontend on Vercel, API on Render free, Postgres on Neon free. No card required at any step.
-
-1. **Neon** (Postgres): create a free project → copy the connection string → convert it to the JDBC form Render needs:
-
-   ```
-   postgresql://user:pass@ep-xxx.region.aws.neon.tech/neondb?sslmode=require
-   ⤷ jdbc:postgresql://ep-xxx.region.aws.neon.tech:5432/neondb?sslmode=require
-   ```
-
-2. **Render** (API): New Web Service → connect the GitHub repo → Root Directory `backend` → runtime "Docker" (uses `backend/Dockerfile`) → **Free** instance → set these env vars and save:
-
-   | Variable | Value |
-   |----------|-------|
-   | `DATABASE_URL` | the JDBC URL from step 1 |
-   | `JWT_SECRET` | long random string (e.g. `openssl rand -hex 32`) |
-   | `ADMIN_PASSWORD` | strong password |
-   | `CORS_ORIGINS` | your Vercel URL (update after step 4) |
-
-   Health check path: `/actuator/health`. If you name the service `raajwarasa-api`, its URL is `https://raajwarasa-api.onrender.com` — keep the name or edit `frontend/vercel.json` to match.
-
-3. **Vercel** (frontend): Add New Project → import the GitHub repo → Framework Preset **Vite**, Root Directory **frontend**, Build `npm run build`, Output `dist`. Deploy.
-
-4. Back in Render, set `CORS_ORIGINS` to the deployed Vercel URL and redeploy.
-
-Notes:
-- Render free instances sleep after ~15 min idle (first visit may take ~30–60s to wake); Neon free and Vercel Hobby stay always-on.
-- Render disks are ephemeral — uploaded media can be lost on deploy/restart; the catalog lives in Neon, so uploads are re-importable. Keep rare original assets backed up.
-- `frontend/vercel.json` routes `/api` and `/uploads` to the Render host and falls back to `/index.html` for SPA routes.
-
-In both cases:
-1. Set a long random `JWT_SECRET`
-2. Change `ADMIN_PASSWORD` and log in once
-3. Add a cron job: `0 3 * * * PGPASSWORD=... ./scripts/backup.sh /var/backups/raajwarasa >> /var/log/raajwarasa-backup.log 2>&1`
+Production notes:
+1. Set a long random `JWT_SECRET` (e.g. `openssl rand -base64 48`)
+2. Change `ADMIN_PASSWORD` before the first login
+3. Back up the database daily with `scripts/backup.sh` (see runbook below)
+4. To make it public later, run the same compose stack on any always-on machine (a free cloud VM or your own) and front it with a free HTTPS tunnel — no platform account required.
 
 ### Production checksheet (`/actuator/health/liveness` + `/readiness`)
 
