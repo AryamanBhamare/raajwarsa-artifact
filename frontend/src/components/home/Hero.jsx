@@ -12,7 +12,9 @@ export default function Hero({ artifact }) {
       <div className="hero__bg">
         <img
           src={heroImage}
-          alt=""
+          alt={artifact?.name
+            ? `${artifact.name} — Raajwarasa heritage collection`
+            : 'Raajwarasa heritage collection'}
           className={`hero__img ${loaded ? 'hero__img--loaded' : ''}`}
           onLoad={() => setLoaded(true)}
         />

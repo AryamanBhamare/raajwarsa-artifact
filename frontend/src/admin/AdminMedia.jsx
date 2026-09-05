@@ -73,7 +73,7 @@ export default function AdminMedia() {
           {items.map((m) => (
             <div key={m.id} className="a-media">
               <div className="a-media__img">
-                <img src={m.url} alt={m.altText || ''} loading="lazy" />
+                <img src={m.url} alt={m.altText || 'Uploaded image'} loading="lazy" />
               </div>
               <div className="a-media__info">
                 <div className="a-media__alt" title={m.altText || ''}>{m.altText || 'Untitled'}</div>

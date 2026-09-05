@@ -95,7 +95,8 @@ for (const [pathname, name] of [
     const imgs = [...document.querySelectorAll('img')].filter((x) => {
       const r = x.getBoundingClientRect();
       const src = (x.src || '').replace(location.origin, '');
-      return r.width > 0 && r.height > 0 && !x.alt && (!src.includes('/placeholders/') || x.className.includes('insta'));
+      return r.width > 0 && r.height > 0 && !x.hasAttribute('alt') &&
+        (!src.includes('/placeholders/') || x.className.includes('insta'));
     }).length;
     return { overflow, missingAlt: imgs };
   });
