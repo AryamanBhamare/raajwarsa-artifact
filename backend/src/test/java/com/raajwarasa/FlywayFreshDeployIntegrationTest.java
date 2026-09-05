@@ -20,7 +20,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class FlywayFreshDeployIntegrationTest {
 
-    private static final String DEFAULT_HOST = env("TEST_DB_HOST", "localhost:5433");
+    private static final String TEST_DB_URL = env("TEST_DB_URL",
+            "jdbc:postgresql://localhost:5433/raajwarasa_test");
+    private static final String DEFAULT_HOST = env("TEST_DB_HOST", hostOf(TEST_DB_URL));
     private static final String DEFAULT_USER = env("TEST_DB_USER", "postgres");
     private static final String DEFAULT_PASS = env("TEST_DB_PASSWORD", "password");
 
@@ -71,5 +73,18 @@ class FlywayFreshDeployIntegrationTest {
     private static String env(String key, String fallback) {
         String value = System.getenv(key);
         return value == null || value.isBlank() ? fallback : value;
+    }
+
+    /** Derives host:port from a TEST_DB_URL like jdbc:postgresql://host:port/db. */
+    private static String hostOf(String url) {
+        try {
+            java.net.URI u = new java.net.URI(url.substring("jdbc:postgresql:".length()));
+            if (u.getHost() != null && u.getPort() > 0) {
+                return u.getHost() + ":" + u.getPort();
+            }
+        } catch (Exception ignored) {
+            // fall through to the default
+        }
+        return "localhost:5433";
     }
 }
