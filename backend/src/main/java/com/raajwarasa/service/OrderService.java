@@ -24,6 +24,9 @@ public class OrderService {
 
     private static final Set<String> ORDER_STATUSES = Set.of(
             "NEW", "CONFIRMED", "PAID", "CANCELLED", "DISPATCHED", "DELIVERED");
+    private static final Set<String> DELIVERY_MODES = Set.of("STANDARD", "PICKUP");
+    private static final Set<String> PAYMENT_METHODS = Set.of("UPI", "CARD", "NETBANKING", "COD");
+    private static final int MAX_QUANTITY = 99;
 
     private final OrderRepository orderRepository;
     private final ArtifactRepository artifactRepository;
@@ -35,30 +38,51 @@ public class OrderService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cart is empty");
         }
 
+        String deliveryMode = normalize(req.deliveryMode(), null);
+        if (!DELIVERY_MODES.contains(deliveryMode)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid delivery mode");
+        }
+        String paymentMethod = normalize(req.paymentMethod(), null);
+        if (!PAYMENT_METHODS.contains(paymentMethod)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid payment method");
+        }
+
+        boolean pickup = "PICKUP".equals(deliveryMode);
+        if (!pickup) {
+            requireNotBlank(req.address(), "Delivery address is required");
+            requireNotBlank(req.city(), "City is required");
+            requireNotBlank(req.state(), "State is required");
+            requireNotBlank(req.pincode(), "PIN code is required");
+            if (!req.pincode().trim().matches("^[0-9]{6}$")) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "PIN code must be 6 digits");
+            }
+        }
+
         Order order = new Order();
         order.setCustomerName(req.customerName().trim());
         order.setEmail(req.email().trim().toLowerCase());
         order.setPhone(req.phone().trim());
-        order.setAddress(req.address().trim());
-        order.setCity(req.city().trim());
-        order.setState(req.state().trim());
-        order.setPincode(req.pincode().trim());
-        order.setDeliveryMode(normalize(req.deliveryMode(), "STANDARD"));
-        order.setPaymentMethod(normalize(req.paymentMethod(), "COD"));
+        order.setAddress(pickup ? blankToNull(req.address()) : req.address().trim());
+        order.setCity(pickup ? blankToNull(req.city()) : req.city().trim());
+        order.setState(pickup ? blankToNull(req.state()) : req.state().trim());
+        order.setPincode(pickup ? blankToNull(req.pincode()) : req.pincode().trim());
+        order.setDeliveryMode(deliveryMode);
+        order.setPaymentMethod(paymentMethod);
 
         BigDecimal total = BigDecimal.ZERO;
         Set<Long> seen = new java.util.HashSet<>();
         for (OrderRequest.ItemEntry entry : entries) {
-            if (entry.quantity() == null || entry.quantity() < 1) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quantity must be at least 1");
+            if (entry.quantity() == null || entry.quantity() < 1 || entry.quantity() > MAX_QUANTITY) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Quantity per piece must be between 1 and " + MAX_QUANTITY);
             }
-            if (!seen.add(entry.artifactId())) {
+            if (entry.artifactId() == null || !seen.add(entry.artifactId())) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Duplicate item in cart");
             }
             Artifact artifact = artifactRepository.findById(entry.artifactId())
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
                             "Artifact not available"));
-            if (!artifact.isSaleAvailable() || artifact.getPrice() == null) {
+            if (!artifact.isActive() || !artifact.isSaleAvailable() || artifact.getPrice() == null) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         artifact.getName() + " is not available for purchase");
             }
@@ -108,5 +132,15 @@ public class OrderService {
 
     private String normalize(String value, String fallback) {
         return value == null || value.isBlank() ? fallback : value.trim().toUpperCase();
+    }
+
+    private void requireNotBlank(String value, String message) {
+        if (value == null || value.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
+        }
+    }
+
+    private String blankToNull(String value) {
+        return value == null || value.isBlank() ? null : value.trim();
     }
 }

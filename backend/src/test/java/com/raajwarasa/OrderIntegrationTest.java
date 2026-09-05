@@ -113,4 +113,100 @@ class OrderIntegrationTest extends AbstractIntegrationTest {
                 .andReturn();
         return mapper.readTree(res.getResponse().getContentAsString()).path("token").asText();
     }
+
+    @Test
+    void pickupOrdersSkipDeliveryAddress() throws Exception {
+        JsonNode artifacts = mapper.readTree(mvc.perform(get("/api/public/artifacts"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString()).path("items");
+        JsonNode sale = null;
+        for (JsonNode a : artifacts) {
+            if (a.path("saleAvailable").asBoolean() && !a.path("price").isNull()) {
+                sale = a;
+                break;
+            }
+        }
+        assertThat(sale).isNotNull();
+
+        String pickupBody = mapper.writeValueAsString(Map.of(
+                "customerName", "Pickup Customer",
+                "email", "pickup@example.com",
+                "phone", "7030751155",
+                "address", "",
+                "city", "",
+                "state", "",
+                "pincode", "",
+                "deliveryMode", "PICKUP",
+                "paymentMethod", "COD",
+                "items", List.of(Map.of("artifactId", sale.path("id").asLong(), "quantity", 1))
+        ));
+        mvc.perform(post("/api/public/orders")
+                        .contentType(MediaType.APPLICATION_JSON).content(pickupBody))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.deliveryMode").value("PICKUP"))
+                .andExpect(jsonPath("$.address").doesNotExist());
+
+        String noPickupAddress = mapper.writeValueAsString(Map.of(
+                "customerName", "No Address",
+                "email", "noaddress@example.com",
+                "phone", "7030751155",
+                "address", "  ",
+                "city", "",
+                "state", "",
+                "pincode", "",
+                "deliveryMode", "STANDARD",
+                "paymentMethod", "COD",
+                "items", List.of(Map.of("artifactId", sale.path("id").asLong(), "quantity", 1))
+        ));
+        mvc.perform(post("/api/public/orders")
+                        .contentType(MediaType.APPLICATION_JSON).content(noPickupAddress))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void ordersRejectBogusModesAndOversizedQuantity() throws Exception {
+        JsonNode artifacts = mapper.readTree(mvc.perform(get("/api/public/artifacts"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString()).path("items");
+        JsonNode sale = null;
+        for (JsonNode a : artifacts) {
+            if (a.path("saleAvailable").asBoolean() && !a.path("price").isNull()) {
+                sale = a;
+                break;
+            }
+        }
+        assertThat(sale).isNotNull();
+
+        String badMode = mapper.writeValueAsString(Map.of(
+                "customerName", "Bad Mode",
+                "email", "badmode@example.com",
+                "phone", "7030751155",
+                "address", "Deo Wada, Keshav Nagar, Chinchwad",
+                "city", "Pimpri-Chinchwad",
+                "state", "Maharashtra",
+                "pincode", "411033",
+                "deliveryMode", "DRONE",
+                "paymentMethod", "UPI",
+                "items", List.of(Map.of("artifactId", sale.path("id").asLong(), "quantity", 1))
+        ));
+        mvc.perform(post("/api/public/orders")
+                        .contentType(MediaType.APPLICATION_JSON).content(badMode))
+                .andExpect(status().isBadRequest());
+
+        String hugeQty = mapper.writeValueAsString(Map.of(
+                "customerName", "Huge Qty",
+                "email", "huge@example.com",
+                "phone", "7030751155",
+                "address", "Deo Wada, Keshav Nagar, Chinchwad",
+                "city", "Pimpri-Chinchwad",
+                "state", "Maharashtra",
+                "pincode", "411033",
+                "deliveryMode", "STANDARD",
+                "paymentMethod", "UPI",
+                "items", List.of(Map.of("artifactId", sale.path("id").asLong(), "quantity", 5000))
+        ));
+        mvc.perform(post("/api/public/orders")
+                        .contentType(MediaType.APPLICATION_JSON).content(hugeQty))
+                .andExpect(status().isBadRequest());
+    }
 }

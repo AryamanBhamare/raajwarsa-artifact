@@ -5,7 +5,7 @@ export const BRAND = {
   whatsappNumber: '917030751155',
   whatsappMessage: encodeURIComponent('Namaskar, I would like to know more about Raajwarasa.'),
   phoneDisplay: '+91 70307 51155',
-  emailDisplay: 'To be announced',
+  emailDisplay: '',
   address: 'Deo Wada, Keshav Nagar, Chinchwad, Pimpri-Chinchwad, Maharashtra 411033',
   mapQuery: 'Deo Wada, Keshav Nagar, Chinchwad, Pimpri-Chinchwad, Maharashtra 411033',
   mapPlusCode: 'JQFH+VP Pimpri-Chinchwad, Maharashtra'

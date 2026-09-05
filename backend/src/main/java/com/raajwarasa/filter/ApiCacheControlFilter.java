@@ -11,7 +11,8 @@ import java.io.IOException;
 
 /**
  * Sets Cache-Control across the API:
- *  - public read endpoints: short shared-cache TTL (CDN-friendly)
+ *  - public read endpoints: browsers must always revalidate (so admin edits
+ *    appear instantly), while shared/CDN caches may hold a copy for a minute
  *  - uploaded media: an hour (changes are rare and admin-controlled)
  *  - everything else (auth, admin, writes): never cached
  *
@@ -28,7 +29,7 @@ public class ApiCacheControlFilter extends OncePerRequestFilter {
         String cachePolicy;
 
         if ("GET".equalsIgnoreCase(request.getMethod()) && path.startsWith("/api/public/")) {
-            cachePolicy = "public, max-age=60, s-maxage=120";
+            cachePolicy = "public, max-age=0, s-maxage=60";
         } else if ("GET".equalsIgnoreCase(request.getMethod()) && path.startsWith("/uploads/")) {
             cachePolicy = "public, max-age=3600";
         } else {

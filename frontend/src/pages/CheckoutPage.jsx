@@ -46,10 +46,12 @@ export default function CheckoutPage() {
     if (!form.customerName.trim()) errs.customerName = 'Please enter your name';
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) errs.email = 'Please enter a valid email';
     if (!/^[0-9]{10,12}$/.test(form.phone.trim())) errs.phone = 'Enter a 10-digit phone number';
-    if (!form.address.trim()) errs.address = 'Please enter your address';
-    if (!form.city.trim()) errs.city = 'Please enter your city';
-    if (!form.state) errs.state = 'Please select your state';
-    if (!/^[0-9]{6}$/.test(form.pincode.trim())) errs.pincode = 'PIN code must be 6 digits';
+    if (deliveryMode !== 'PICKUP') {
+      if (!form.address.trim()) errs.address = 'Please enter your address';
+      if (!form.city.trim()) errs.city = 'Please enter your city';
+      if (!form.state) errs.state = 'Please select your state';
+      if (!/^[0-9]{6}$/.test(form.pincode.trim())) errs.pincode = 'PIN code must be 6 digits';
+    }
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -110,7 +112,7 @@ export default function CheckoutPage() {
           </p>
           <ul className="checkout-done__facts">
             <li><span>Items</span><span>{order.items.reduce((s, i) => s + i.quantity, 0)}</span></li>
-            <li><span>Deliver to</span><span>{order.city}, {order.state} · {order.pincode}</span></li>
+            <li><span>Collect at</span><span>{order.deliveryMode === 'PICKUP' ? 'Deo Wada studio, Chinchwad' : `${order.city}, ${order.state} · ${order.pincode}`}</span></li>
             <li><span>Payment</span><span>{order.deliveryMode === 'PICKUP' ? 'At the studio' : order.paymentMethod}</span></li>
           </ul>
           <div className="checkout-done__actions">
@@ -175,31 +177,49 @@ export default function CheckoutPage() {
                       {errors.email && <span className="form-error">{errors.email}</span>}
                     </div>
                   </div>
-                  <div className="form-field">
-                    <label htmlFor="co-address">Full address *</label>
-                    <textarea id="co-address" rows="2" value={form.address} onChange={setField('address')} autoComplete="street-address" placeholder="House / building, street, landmark" />
-                    {errors.address && <span className="form-error">{errors.address}</span>}
-                  </div>
-                  <div className="checkout__row checkout__row--3">
-                    <div className="form-field">
-                      <label htmlFor="co-city">City *</label>
-                      <input id="co-city" type="text" value={form.city} onChange={setField('city')} autoComplete="address-level2" placeholder="City" />
-                      {errors.city && <span className="form-error">{errors.city}</span>}
+                  {deliveryMode === 'PICKUP' ? (
+                    <div className="checkout__pickup">
+                      <div className="checkout__pickup-mark" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.4">
+                          <path d="M12 21s-7-5.6-7-11a7 7 0 0 1 14 0c0 5.4-7 11-7 11z" />
+                          <circle cx="12" cy="10" r="2.6" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="checkout__pickup-title">Collect in person at the Deo Wada studio</p>
+                        <p className="checkout__pickup-address">{BRAND.mapQuery} · {BRAND.mapPlusCode}</p>
+                        <p className="checkout__pickup-note">We will message you on WhatsApp to arrange a convenient day and time.</p>
+                      </div>
                     </div>
-                    <div className="form-field">
-                      <label htmlFor="co-state">State *</label>
-                      <select id="co-state" value={form.state} onChange={setField('state')} autoComplete="address-level1">
-                        <option value="">Select state</option>
-                        {INDIAN_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
-                      </select>
-                      {errors.state && <span className="form-error">{errors.state}</span>}
-                    </div>
-                    <div className="form-field">
-                      <label htmlFor="co-pin">PIN code *</label>
-                      <input id="co-pin" type="text" inputMode="numeric" maxLength="6" value={form.pincode} onChange={setField('pincode')} autoComplete="postal-code" placeholder="411033" />
-                      {errors.pincode && <span className="form-error">{errors.pincode}</span>}
-                    </div>
-                  </div>
+                  ) : (
+                    <>
+                      <div className="form-field">
+                        <label htmlFor="co-address">Full address *</label>
+                        <textarea id="co-address" rows="2" value={form.address} onChange={setField('address')} autoComplete="street-address" placeholder="House / building, street, landmark" />
+                        {errors.address && <span className="form-error">{errors.address}</span>}
+                      </div>
+                      <div className="checkout__row checkout__row--3">
+                        <div className="form-field">
+                          <label htmlFor="co-city">City *</label>
+                          <input id="co-city" type="text" value={form.city} onChange={setField('city')} autoComplete="address-level2" placeholder="City" />
+                          {errors.city && <span className="form-error">{errors.city}</span>}
+                        </div>
+                        <div className="form-field">
+                          <label htmlFor="co-state">State *</label>
+                          <select id="co-state" value={form.state} onChange={setField('state')} autoComplete="address-level1">
+                            <option value="">Select state</option>
+                            {INDIAN_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
+                          </select>
+                          {errors.state && <span className="form-error">{errors.state}</span>}
+                        </div>
+                        <div className="form-field">
+                          <label htmlFor="co-pin">PIN code *</label>
+                          <input id="co-pin" type="text" inputMode="numeric" maxLength="6" value={form.pincode} onChange={setField('pincode')} autoComplete="postal-code" placeholder="411033" />
+                          {errors.pincode && <span className="form-error">{errors.pincode}</span>}
+                        </div>
+                      </div>
+                    </>
+                  )}
 
                   <div className="checkout__modes">
                     {DELIVERY_MODES.map((m) => (

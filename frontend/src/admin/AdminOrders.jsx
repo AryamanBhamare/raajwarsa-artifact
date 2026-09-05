@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { adminApi } from '../lib/api';
 import { formatDate } from '../lib/utils';
 import { formatINR } from '../config';
@@ -100,8 +100,8 @@ export default function AdminOrders() {
               </thead>
               <tbody>
                 {filtered.map((o) => (
-                  <>
-                    <tr key={o.id}>
+                  <Fragment key={o.id}>
+                    <tr>
                       <td className="a-table__strong">{o.orderNumber}</td>
                       <td>
                         {o.customerName}
@@ -135,7 +135,7 @@ export default function AdminOrders() {
                       </td>
                     </tr>
                     {expanded === o.id && (
-                      <tr key={`${o.id}-detail`} className="a-table__detail-row">
+                      <tr className="a-table__detail-row">
                         <td colSpan={8}>
                           <div className="a-order-detail">
                             <div className="a-order-detail__grid">
@@ -198,7 +198,7 @@ export default function AdminOrders() {
                         </td>
                       </tr>
                     )}
-                  </>
+                  </Fragment>
                 ))}
               </tbody>
             </table>

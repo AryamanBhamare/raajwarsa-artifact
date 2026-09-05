@@ -73,12 +73,14 @@ export default function ContactPage() {
                   {BRAND.phoneDisplay}
                 </a>
               </div>
-              <div className="contact-page__channel">
-                <span className="contact-page__channel-label">Email</span>
-                <span className="contact-page__channel-value contact-page__channel-value--muted">
-                  {BRAND.emailDisplay}
-                </span>
-              </div>
+              {BRAND.emailDisplay && (
+                <div className="contact-page__channel">
+                  <span className="contact-page__channel-label">Email</span>
+                  <span className="contact-page__channel-value contact-page__channel-value--muted">
+                    {BRAND.emailDisplay}
+                  </span>
+                </div>
+              )}
               <div className="contact-page__channel">
                 <span className="contact-page__channel-label">Location</span>
                 <span className="contact-page__channel-value">{BRAND.address}</span>

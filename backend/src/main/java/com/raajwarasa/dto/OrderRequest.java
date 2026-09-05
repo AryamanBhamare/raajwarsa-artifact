@@ -21,20 +21,16 @@ public record OrderRequest(
         @Pattern(regexp = "^[0-9]{10,12}$", message = "Enter a valid phone number")
         String phone,
 
-        @NotBlank(message = "Address is required")
         @Size(max = 500)
         String address,
 
-        @NotBlank(message = "City is required")
         @Size(max = 120)
         String city,
 
-        @NotBlank(message = "State is required")
         @Size(max = 120)
         String state,
 
-        @NotBlank(message = "PIN code is required")
-        @Pattern(regexp = "^[0-9]{6}$", message = "PIN code must be 6 digits")
+        @Size(max = 10)
         String pincode,
 
         @NotNull(message = "Delivery mode is required")

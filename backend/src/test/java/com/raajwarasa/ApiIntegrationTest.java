@@ -212,8 +212,8 @@ class ApiIntegrationTest extends AbstractIntegrationTest {
 
     @Test
     void publicResponsesAreCacheableAndAdminResponsesAreNot() throws Exception {
-        mvc.perform(get("/api/public/home")).andExpect(header().string("Cache-Control", "public, max-age=60, s-maxage=120"));
-        mvc.perform(get("/api/public/artifacts")).andExpect(header().string("Cache-Control", "public, max-age=60, s-maxage=120"));
+        mvc.perform(get("/api/public/home")).andExpect(header().string("Cache-Control", "public, max-age=0, s-maxage=60"));
+        mvc.perform(get("/api/public/artifacts")).andExpect(header().string("Cache-Control", "public, max-age=0, s-maxage=60"));
         String token = adminToken();
         mvc.perform(get("/api/admin/dashboard").header("Authorization", "Bearer " + token))
                 .andExpect(header().string("Cache-Control", "no-store"));
