@@ -120,7 +120,7 @@ GitHub Actions runs the same suite (`.github/workflows/ci.yml`): a Postgres 16 s
 
 The whole stack is designed for $0 hosting. | Area | Free option |
 
-| Public site (SPA) | Cloudflare Pages (build `frontend`: `npm ci && npm run build`) |
+| Public site (SPA) | **Vercel Hobby** (free, one-click GitHub deploy; `frontend/vercel.json` included) — Cloudflare Pages also works |
 | Backend API | Oracle Cloud Always Free VM (1–4 OCPU ARM) or Render free web service running `docker-compose.yml` — or the same VPS for everything |
 | Database | Neon or Supabase free Postgres (Neon: true PostgreSQL, SQL passthrough, easy `DATABASE_URL`; Supabase: Postgres + storage if you want it) |
 | Media | On-VM disk via `UPLOAD_DIR` (simplest, zero cost). Upgrade path: Cloudflare R2 10GB tier — mount a browse-able object store or add a storage driver later |
@@ -129,7 +129,34 @@ Options in detail:
 
 **Option A — everything on one VPS (simplest, recommended).** Bring up the Oracle Always Free VM, install Docker, then `docker compose up -d --build`. Back it with `scripts/backup.sh` on cron. Stick Cloudflare Tunnel (free) or Cloudflare DNS + the VPS IP in front for TLS.
 
-**Option B — fully managed split.** Frontend on Cloudflare Pages, API on Render free (a Spring Boot JAR or the Docker image), DB on Neon free. Uploads go to the API VM's disk (persistence comes from the DB — media can be re-imported, so back the DB daily and keep rare original assets in git or drive).
+**Option B — fully managed split (Vercel + Render + Neon, all free).** Frontend on Vercel, API on Render free, Postgres on Neon free. No card required at any step.
+
+1. **Neon** (Postgres): create a free project → copy the connection string → convert it to the JDBC form Render needs:
+
+   ```
+   postgresql://user:pass@ep-xxx.region.aws.neon.tech/neondb?sslmode=require
+   ⤷ jdbc:postgresql://ep-xxx.region.aws.neon.tech:5432/neondb?sslmode=require
+   ```
+
+2. **Render** (API): New Web Service → connect the GitHub repo → Root Directory `backend` → runtime "Docker" (uses `backend/Dockerfile`) → **Free** instance → set these env vars and save:
+
+   | Variable | Value |
+   |----------|-------|
+   | `DATABASE_URL` | the JDBC URL from step 1 |
+   | `JWT_SECRET` | long random string (e.g. `openssl rand -hex 32`) |
+   | `ADMIN_PASSWORD` | strong password |
+   | `CORS_ORIGINS` | your Vercel URL (update after step 4) |
+
+   Health check path: `/actuator/health`. If you name the service `raajwarasa-api`, its URL is `https://raajwarasa-api.onrender.com` — keep the name or edit `frontend/vercel.json` to match.
+
+3. **Vercel** (frontend): Add New Project → import the GitHub repo → Framework Preset **Vite**, Root Directory **frontend**, Build `npm run build`, Output `dist`. Deploy.
+
+4. Back in Render, set `CORS_ORIGINS` to the deployed Vercel URL and redeploy.
+
+Notes:
+- Render free instances sleep after ~15 min idle (first visit may take ~30–60s to wake); Neon free and Vercel Hobby stay always-on.
+- Render disks are ephemeral — uploaded media can be lost on deploy/restart; the catalog lives in Neon, so uploads are re-importable. Keep rare original assets backed up.
+- `frontend/vercel.json` routes `/api` and `/uploads` to the Render host and falls back to `/index.html` for SPA routes.
 
 In both cases:
 1. Set a long random `JWT_SECRET`
