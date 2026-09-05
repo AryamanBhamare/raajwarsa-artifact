@@ -1,5 +1,6 @@
 package com.raajwarasa.controller;
 
+import com.raajwarasa.dto.MediaItemResponse;
 import com.raajwarasa.entity.MediaItem;
 import com.raajwarasa.repository.MediaItemRepository;
 import com.raajwarasa.service.MediaService;
@@ -20,18 +21,19 @@ public class AdminMediaController {
     private final MediaItemRepository mediaItemRepository;
 
     @GetMapping
-    public List<MediaItem> list() {
+    public List<MediaItemResponse> list() {
         return mediaItemRepository.findAll().stream()
                 .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()))
+                .map(MediaItemResponse::from)
                 .toList();
     }
 
     @PostMapping("/upload")
-    public MediaItem upload(@RequestParam("file") MultipartFile file,
+    public MediaItemResponse upload(@RequestParam("file") MultipartFile file,
                             @RequestParam(required = false) Long artifactId,
                             @RequestParam(required = false) String altText,
                             @RequestParam(required = false) String kind) throws IOException {
-        return mediaService.store(file, artifactId, altText, kind);
+        return MediaItemResponse.from(mediaService.store(file, artifactId, altText, kind));
     }
 
     @DeleteMapping("/{id}")
