@@ -62,11 +62,20 @@ export default function AdminInquiryDetail() {
   if (loading) return <div className="a-page"><div className="a-skeleton" style={{ height: 400 }} /></div>;
   if (!inq) return <div className="a-page"><div className="a-empty">Enquiry not found.</div></div>;
 
+  const dial = (inq.phone || '').replace(/\D/g, '');
+  const waUrl = dial
+    ? `https://wa.me/${dial}?text=${encodeURIComponent(
+        `Namaskar, this is Raajwarasa. Thank you for your enquiry${inq.artifactName ? ` about the ${inq.artifactName}` : ''} — how can we help?`
+      )}`
+    : null;
+  const gmailUrl = inq.email
+    ? `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(inq.email)}&su=${encodeURIComponent('Raajwarasa — Enquiry follow-up')}&body=${encodeURIComponent('Namaskar, following up on your enquiry.\n\nBest regards,\nRaajwarasa')}`
+    : null;
   const contactMethods = [
-    { label: `Call${inq.phone ? ' ' + inq.phone : ''}`, href: inq.phone ? `tel:${inq.phone.replace(/[^+\d]/g, '')}` : null, primary: true },
-    { label: `Email ${inq.email}`, href: `mailto:${inq.email}`, primary: false },
-    ...(inq.preferredContact && inq.preferredContact !== 'Email' ? [{ label: `Contact via ${inq.preferredContact}`, href: null, primary: false }] : [])
-  ];
+    { label: `📞 Call ${inq.phone}`, href: dial ? `tel:+${dial}` : null, tone: 'primary' },
+    { label: `💬 WhatsApp ${inq.phone}`, href: waUrl, tone: 'green', external: true },
+    { label: `✉️ Email ${inq.email}`, href: gmailUrl, tone: 'outline', external: true }
+  ].filter((m) => m.href);
 
   return (
     <div className="a-page">
@@ -92,13 +101,14 @@ export default function AdminInquiryDetail() {
           <div className="a-contact-actions">
             {contactMethods.map((m, i) => (
               <span key={i}>
-                {m.href ? (
-                  <a href={m.href} className={`a-btn a-btn--sm ${m.primary ? 'a-btn--primary' : 'a-btn--outline'}`}>
-                    {m.primary && '📞 '}{m.label}
-                  </a>
-                ) : (
-                  <span className="a-muted-text">{m.label}</span>
-                )}
+                <a
+                  href={m.href}
+                  target={m.external ? '_blank' : undefined}
+                  rel={m.external ? 'noreferrer' : undefined}
+                  className={`a-btn a-btn--sm ${m.tone === 'green' ? 'a-btn--green' : m.tone === 'primary' ? 'a-btn--primary' : 'a-btn--outline'}`}
+                >
+                  {m.label}
+                </a>
               </span>
             ))}
           </div>
