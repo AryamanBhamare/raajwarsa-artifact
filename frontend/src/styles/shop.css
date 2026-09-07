@@ -2,37 +2,76 @@
    SHOP — cart, checkout, WhatsApp float, map, admin orders
    ========================================================= */
 
-/* ---------------- WhatsApp floating button ---------------- */
-.whatsapp-float {
+/* ---------------- Floating action buttons ---------------- */
+.float-actions {
   position: fixed;
   right: 26px;
   bottom: 26px;
   z-index: 900;
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.float-btn {
+  position: relative;
+  display: flex;
   align-items: center;
   text-decoration: none;
 }
 
-.whatsapp-float__icon {
+.float-btn__icon {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 58px;
   height: 58px;
   border-radius: 50%;
-  background: #1faa53;
   color: #fff;
-  box-shadow: 0 12px 30px -8px rgba(31, 170, 83, 0.55);
+  box-shadow: 0 12px 30px -8px rgba(0, 0, 0, 0.45);
   transition: transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
   position: relative;
 }
 
-.whatsapp-float:hover .whatsapp-float__icon {
+.float-btn:hover .float-btn__icon {
   transform: translateY(-2px) scale(1.04);
+}
+
+.float-btn--whatsapp .float-btn__icon {
+  background: #1faa53;
+  box-shadow: 0 12px 30px -8px rgba(31, 170, 83, 0.55);
+}
+
+.float-btn--whatsapp:hover .float-btn__icon {
   box-shadow: 0 16px 40px -8px rgba(31, 170, 83, 0.6);
 }
 
-.whatsapp-float__ring {
+.float-btn--phone .float-btn__icon {
+  background: #1a73e8;
+}
+
+.float-btn--phone:hover .float-btn__icon {
+  box-shadow: 0 16px 40px -8px rgba(26, 115, 232, 0.6);
+}
+
+.float-btn--instagram .float-btn__icon {
+  background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+}
+
+.float-btn--instagram:hover .float-btn__icon {
+  box-shadow: 0 16px 40px -8px rgba(220, 39, 67, 0.6);
+}
+
+.float-btn--maps .float-btn__icon {
+  background: #ea4335;
+}
+
+.float-btn--maps:hover .float-btn__icon {
+  box-shadow: 0 16px 40px -8px rgba(234, 67, 53, 0.6);
+}
+
+.float-btn__ring {
   position: absolute;
   inset: 0;
   border-radius: 50%;
@@ -46,7 +85,7 @@
   100% { transform: scale(1.45); opacity: 0; }
 }
 
-.whatsapp-float__label {
+.float-btn__label {
   position: absolute;
   right: calc(100% + 12px);
   top: 50%;
@@ -64,15 +103,15 @@
   transition: opacity var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
 }
 
-.whatsapp-float:hover .whatsapp-float__label {
+.float-btn:hover .float-btn__label {
   opacity: 1;
   transform: translateY(-50%) translateX(0);
 }
 
 @media (max-width: 560px) {
-  .whatsapp-float { right: 18px; bottom: 18px; }
-  .whatsapp-float__icon { width: 52px; height: 52px; }
-  .whatsapp-float__label { display: none; }
+  .float-actions { right: 18px; bottom: 18px; gap: 10px; }
+  .float-btn__icon { width: 52px; height: 52px; }
+  .float-btn__label { display: none; }
 }
 
 /* ---------------- Navbar cart badge ---------------- */

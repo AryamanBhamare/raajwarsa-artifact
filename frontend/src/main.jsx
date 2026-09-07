@@ -16,7 +16,7 @@ import { CartProvider } from './context/CartContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Loader from './components/Loader';
-import WhatsAppFloat from './components/WhatsAppFloat';
+import FloatingActions from './components/FloatingActions';
 
 import HomePage from './pages/HomePage';
 import CollectionPage from './pages/CollectionPage';
@@ -67,7 +67,7 @@ function PublicLayout() {
         </Routes>
       </main>
       <Footer />
-      <WhatsAppFloat />
+      <FloatingActions />
     </div>
   );
 }

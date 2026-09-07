@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { submitContact } from '../lib/api';
 import Reveal from '../components/Reveal';
-import { BRAND, whatsappUrl, mapEmbedUrl, mapLinkUrl } from '../config';
+import { BRAND, whatsappUrl, mapEmbedUrl, mapDirectionsUrl } from '../config';
 
 export default function ContactPage() {
   const [form, setForm] = useState({ name: '', email: '', phone: '', message: '' });
@@ -166,7 +166,7 @@ export default function ContactPage() {
                 </li>
               </ul>
               <div className="visit__actions">
-                <a href={mapLinkUrl} target="_blank" rel="noreferrer" className="btn btn--primary">
+                <a href={mapDirectionsUrl} target="_blank" rel="noreferrer" className="btn btn--primary">
                   Get directions
                   <span className="btn-arrow">→</span>
                 </a>
