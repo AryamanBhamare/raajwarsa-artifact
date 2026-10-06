@@ -2,7 +2,7 @@
    SHOP — cart, checkout, WhatsApp float, map, admin orders
    ========================================================= */
 
-/* ---------------- Floating action buttons ---------------- */
+/* ---------------- Floating contact actions (collapsed FAB) ---------------- */
 .float-actions {
   position: fixed;
   right: 26px;
@@ -10,8 +10,54 @@
   z-index: 900;
   display: flex;
   flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.float-actions__stack {
+  display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 12px;
+  /* Collapsed by default: clipped and inert, so it can never intercept a click
+     meant for page content (buttons underneath stay fully clickable). */
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+  transition: max-height var(--dur-fast) var(--ease-out), opacity var(--dur-fast) var(--ease-out);
+}
+
+.float-actions--open .float-actions__stack {
+  max-height: 320px;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.float-actions__toggle {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 58px;
+  height: 58px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #1faa53;
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 12px 30px -8px rgba(31, 170, 83, 0.55);
+  transition: transform var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);
+}
+
+.float-actions__toggle:hover {
+  transform: translateY(-2px) scale(1.04);
+}
+
+.float-actions--open .float-actions__toggle {
+  background: #2b211b;
+  box-shadow: 0 12px 30px -8px rgba(0, 0, 0, 0.5);
 }
 
 .float-btn {
@@ -43,10 +89,6 @@
   box-shadow: 0 12px 30px -8px rgba(31, 170, 83, 0.55);
 }
 
-.float-btn--whatsapp:hover .float-btn__icon {
-  box-shadow: 0 16px 40px -8px rgba(31, 170, 83, 0.6);
-}
-
 .float-btn--phone .float-btn__icon {
   background: #1a73e8;
 }
@@ -71,7 +113,7 @@
   box-shadow: 0 16px 40px -8px rgba(234, 67, 53, 0.6);
 }
 
-.float-btn__ring {
+.float-actions__ring {
   position: absolute;
   inset: 0;
   border-radius: 50%;
@@ -110,6 +152,8 @@
 
 @media (max-width: 560px) {
   .float-actions { right: 18px; bottom: 18px; gap: 10px; }
+  .float-actions__stack { gap: 10px; }
+  .float-actions__toggle { width: 52px; height: 52px; }
   .float-btn__icon { width: 52px; height: 52px; }
   .float-btn__label { display: none; }
 }

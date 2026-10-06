@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
+import DOMPurify from 'dompurify';
 import { fetchJournalArticle } from '../lib/api';
 import { firstImage, formatDate, readingTime } from '../lib/utils';
 
@@ -73,7 +74,7 @@ export default function JournalDetailPage() {
         <div className="journal-detail__body">
           <div className="journal-detail__content">
             {article.content ? (
-              <div className="prose" dangerouslySetInnerHTML={{ __html: article.content }} />
+              <div className="prose" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article.content) }} />
             ) : (
               <p style={{ color: 'var(--c-text-muted)', fontStyle: 'italic' }}>Full article coming soon.</p>
             )}

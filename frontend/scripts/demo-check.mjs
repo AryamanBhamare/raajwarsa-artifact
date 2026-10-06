@@ -177,19 +177,20 @@ try {
     await p.goto(`${BASE}${ARTIFACT_PATH}`, { waitUntil: 'networkidle2', timeout: 40000 });
     await settle(p);
     await new Promise((r) => setTimeout(r, 3000));
-    const probe = await p.evaluate((u) => {
-      const imgs = [...document.querySelectorAll('img')];
-      const el = imgs.find((x) => (x.currentSrc || x.src).endsWith(u));
-      return {
-        found: el ? { src: el.currentSrc || el.src, w: el.naturalWidth } : null,
-        imgs: imgs.map((x) => ({ src: x.getAttribute('src'), cur: x.currentSrc || x.src, w: x.naturalWidth })).slice(0, 6),
-        textHead: document.body.innerText.slice(0, 120),
-      };
-    }, newUrl);
-    if (!probe.found) console.error('    [debug] upload not visible in page —', JSON.stringify(probe));
+    // Poll until the new photo is present AND decoded (naturalWidth > 0), otherwise a
+    // still-loading image reports w=0 and the check below misreports a false failure.
+    const probe = await p.waitForFunction(
+      (u) => {
+        const el = [...document.querySelectorAll('img')].find((x) => (x.currentSrc || x.src).endsWith(u));
+        return el && el.complete && el.naturalWidth > 0 ? { src: el.currentSrc || el.src, w: el.naturalWidth } : null;
+      },
+      { timeout: 30000, polling: 500 },
+      newUrl
+    ).then((h) => h.jsonValue());
+    if (!probe) console.error('    [debug] upload not decoded in time —', newUrl);
     await shot(p, '3-public-with-photo');
     await p.close();
-    return probe.found;
+    return probe || { src: '', w: 0 };
   })();
 
   if (publicAfter.src.endsWith(newUrl) && publicAfter.w > 0 && publicAfter.src !== publicBefore.src) {

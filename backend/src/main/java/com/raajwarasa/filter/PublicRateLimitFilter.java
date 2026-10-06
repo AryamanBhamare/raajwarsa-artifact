@@ -47,10 +47,19 @@ public class PublicRateLimitFilter extends OncePerRequestFilter {
         return path.startsWith("/api/public/inquiries") || path.startsWith("/api/public/contact");
     }
 
+    /**
+     * nginx is the single trusted proxy and appends the real client address to the
+     * right-hand end of X-Forwarded-For, so the last hop is the trustworthy one —
+     * a client-supplied leading value cannot be used to dodge the limiter.
+     */
     private String resolveIp(HttpServletRequest request) {
         String forwarded = request.getHeader("X-Forwarded-For");
         if (forwarded != null && !forwarded.isBlank()) {
-            return forwarded.split(",")[0].trim();
+            String[] hops = forwarded.split(",");
+            String last = hops[hops.length - 1].trim();
+            if (!last.isEmpty()) {
+                return last;
+            }
         }
         return request.getRemoteAddr();
     }
